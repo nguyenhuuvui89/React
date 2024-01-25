@@ -1,46 +1,52 @@
-import logo from './logo.svg';
-import './App.css';
-import pizzaData from './data.js'
+import logo from "./logo.svg";
+import "./App.css";
+import pizzaData from "./data.js";
 
 function App() {
   return (
     <div className="container">
-      <Header/>
-      <Menu/>
-      <Footer/>
+      <Header />
+      <Menu />
+      <Footer />
     </div>
   );
 }
-function Header(){
+function Header() {
   return (
-    <header className = 'header footer'>
+    <header className="header footer">
       <h1> Pizza Shop Co.</h1>
     </header>
-  )
+  );
 }
-function Menu(){
+function Menu() {
+  const pizzaAvailable = pizzaData.length;
   return (
-    <main className = 'menu'>
+    <main className="menu">
       <h2>Our Menu</h2>
-      <ul className='pizzas'>
-        {pizzaData.map((pizza)=> <Pizza pizzaObject={pizza} key={pizza}/>)}
-      </ul>
+      {pizzaAvailable > 0 ? (
+        <ul className="pizzas">
+          {pizzaData.map((pizza) => (
+            <Pizza pizzaObject={pizza} key={pizza} />
+          ))}
+        </ul>
+      ) : (
+        <p>Oops! We are all sold out</p>
+      )}
     </main>
-  )
+  );
 }
-function Pizza(props){
-  return (   
-      <li className = 'pizza'>
-        <img src={props.pizzaObject.photoName} alt={props.pizzaObject.name} />
-        <div>
-          <h3>{props.pizzaObject.name}</h3>
-          <p>{props.pizzaObject.ingredients}</p>
-          <span>{props.pizzaObject.price}</span>
-        </div>
-      </li>
-
-  
-  )
+function Pizza(props) {
+  if (props.pizzaObject.soldOut) return null;
+  return (
+    <li className="pizza">
+      <img src={props.pizzaObject.photoName} alt={props.pizzaObject.name} />
+      <div>
+        <h3>{props.pizzaObject.name}</h3>
+        <p>{props.pizzaObject.ingredients}</p>
+        <span>{props.pizzaObject.price}</span>
+      </div>
+    </li>
+  );
 }
 function Footer() {
   const currentTime = new Date();
@@ -48,11 +54,25 @@ function Footer() {
   const getHour = currentTime.getHours();
   const startTime = 10;
   const closedTime = 22;
-  const openTime = getHour > startTime && getHour <closedTime;
+  const openTime = getHour > startTime && getHour < closedTime;
   return (
-    <footer className='footer'>
-      <p>{formattedTime} This {openTime ? 'We are currently opening' : 'We are closed'}</p>
+    <footer className="footer">
+      {openTime ? (
+        <Order formattedTime = {formattedTime}/>
+      ) : (
+        <p>'We are closed (Working Hours 10am to 10pm.)'</p>
+      )}
     </footer>
-  )
+  );
+}
+function Order(props) {
+  return (
+    <div className="order">
+      <p>{props.formattedTime} We are currently opening!</p>
+      <button className="btn" type="button">
+        Order
+      </button>
+    </div>
+  );
 }
 export default App;
