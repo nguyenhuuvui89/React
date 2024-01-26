@@ -1,4 +1,3 @@
-import logo from "./logo.svg";
 import "./App.css";
 import pizzaData from "./data.js";
 
@@ -13,7 +12,7 @@ function App() {
 }
 function Header() {
   return (
-    <header className="header footer">
+    <header className="header">
       <h1> Pizza Shop Co.</h1>
     </header>
   );
@@ -23,27 +22,36 @@ function Menu() {
   return (
     <main className="menu">
       <h2>Our Menu</h2>
+
       {pizzaAvailable > 0 ? (
-        <ul className="pizzas">
-          {pizzaData.map((pizza) => (
-            <Pizza pizzaObject={pizza} key={pizza} />
-          ))}
-        </ul>
+        <>
+          <p>
+            "Welcome to our pizza shop, where passion meets pizza perfection! We
+            are a family-owned pizzeria dedicated to crafting mouthwatering
+            pizzas that delight your taste buds. Our commitment to quality
+            starts with the finest, freshest ingredients, handpicked to create a
+            symphony of flavors in every slice.
+          </p>
+          <ul className="pizzas">
+            {pizzaData.map((pizza) => (
+              <Pizza pizzaObject={pizza} key={pizza} />
+            ))}
+          </ul>
+        </>
       ) : (
         <p>Oops! We are all sold out</p>
       )}
     </main>
   );
 }
-function Pizza(props) {
-  if (props.pizzaObject.soldOut) return null;
+function Pizza({pizzaObject}) {
   return (
-    <li className="pizza">
-      <img src={props.pizzaObject.photoName} alt={props.pizzaObject.name} />
+    <li className={`pizza ${pizzaObject.soldOut ? 'sold-out': ''}`}>
+      <img src={pizzaObject.photoName} alt={pizzaObject.name} />
       <div>
-        <h3>{props.pizzaObject.name}</h3>
-        <p>{props.pizzaObject.ingredients}</p>
-        <span>{props.pizzaObject.price}</span>
+        <h3>{pizzaObject.name}</h3>
+        <p>{pizzaObject.ingredients}</p>
+        <span>{pizzaObject.soldOut ? "Sold Out" : pizzaObject.price}</span>
       </div>
     </li>
   );
@@ -65,10 +73,10 @@ function Footer() {
     </footer>
   );
 }
-function Order(props) {
+function Order({formattedTime}) {
   return (
     <div className="order">
-      <p>{props.formattedTime} We are currently opening!</p>
+      <p>{formattedTime} We are currently opening!</p>
       <button className="btn" type="button">
         Order
       </button>
