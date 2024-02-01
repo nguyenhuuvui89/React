@@ -1,4 +1,3 @@
-import initialItems from "./data";
 import {useState} from 'react';
 
 function App() {
@@ -6,11 +5,14 @@ function App() {
   function handleAddItems(i) {
     setItems((items) => [...items, i]);
   }
+  function handleDeleteItem(deleteId) {
+    setItems((items) => items.filter(item => item.id !== deleteId))
+  }
   return (
     <div className='app'>
       <Logo/>
       <Form onAddItem = {handleAddItems}/>
-      <PackingList list={items}/>
+      <PackingList list={items} handleDeleteItem ={handleDeleteItem}/>
       <Stats/>
     </div>
   );
@@ -51,25 +53,25 @@ function Form({onAddItem}){
     </form>
   );
 }
-function PackingList({list}) {
+function PackingList({list, handleDeleteItem }) {
   return (
     <div className="list">
       <ul>
         {list.map((i) => (
-          <List item={i} key ={i.key}/>
+          <List item={i} handleDeleteItem={handleDeleteItem} key ={i.key}/>
         ))}
       </ul>
     </div>
   );
 }
-function List({item}) {
+function List({item, handleDeleteItem}) {
   return (
     <li>
       <span style={item.packed ? {textDecoration:'line-through'}: {}}>
       {item.inputItem}{' '}
       {item.description}
       </span>
-      <button>❌</button>
+      <button onClick={()=>handleDeleteItem(item.id)}>❌</button>
     </li>
   );
 }
