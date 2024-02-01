@@ -2,11 +2,15 @@ import initialItems from "./data";
 import {useState} from 'react';
 
 function App() {
+  const [items, setItems] = useState([]);
+  function handleAddItems(i) {
+    setItems((items) => [...items, i]);
+  }
   return (
     <div className='app'>
       <Logo/>
-      <Form/>
-      <PackingList list={initialItems}/>
+      <Form onAddItem = {handleAddItems}/>
+      <PackingList list={items}/>
       <Stats/>
     </div>
   );
@@ -15,14 +19,15 @@ function Logo(){
   return <h1>🧳 Travel Stuff 👜</h1>
 }
 
-function Form(){
-  const [description, setDescription] = useState("input")
-  const [inputItem, setInputItem] = useState(5)
+function Form({onAddItem}){
+  const [description, setDescription] = useState("")
+  const [inputItem, setInputItem] = useState(1)
+
   function handleSubmit(e) {
     e.preventDefault();
     if(!description) return;
     const newItem = {description, inputItem, packed: false, id: Date.now()}
-    console.log(newItem)
+    onAddItem(newItem)
     setDescription('')
     setInputItem(1)
   }
@@ -46,22 +51,22 @@ function Form(){
     </form>
   );
 }
-function PackingList() {
+function PackingList({list}) {
   return (
     <div className="list">
       <ul>
-        {initialItems.map((i) => (
+        {list.map((i) => (
           <List item={i} key ={i.key}/>
         ))}
       </ul>
     </div>
   );
 }
-function List({ item }) {
+function List({item}) {
   return (
     <li>
       <span style={item.packed ? {textDecoration:'line-through'}: {}}>
-      {item.quantity}{' '}
+      {item.inputItem}{' '}
       {item.description}
       </span>
       <button>❌</button>
