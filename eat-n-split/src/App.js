@@ -1,3 +1,4 @@
+import { useState } from "react";
 const initialFriends = [
   {
     id: 118836,
@@ -28,14 +29,54 @@ function App() {
 }
 
 function FriendList() {
+  const [friend, setFriend] = useState(false);
+  const [friendList, setFriendList] = useState(initialFriends);
+  const [friendName, setFriendName] = useState("");
+  const [friendImage, setFriendImage] = useState("https://i.pravatar.cc/48");
+
+  function handleAddFriend(e) {
+    e.preventDefault();
+    const addNewFriend = {
+      id: Date.now(),
+      name: friendName,
+      image: friendImage,
+      balance: 0,
+    };
+    setFriendList((friendList) => [...friendList, addNewFriend]);
+  }
   return (
     <div>
-      {initialFriends.map((e, i) => (
+      {friendList.map((e, i) => (
         <Friend friend={e} key={i} />
       ))}
-      <Button newClass="addFriend"> Add friend</Button>
-      <AddFriendForm />
-      <Button newClass="addFriend">Close</Button>
+      <Button
+        number="2"
+        newClass="addFriend"
+        friend={friend}
+        setFriend={setFriend}
+      >
+        {" "}
+        Add friend
+      </Button>
+      {friend && (
+        <div>
+          <AddFriendForm
+            friendName={friendName}
+            setFriendName={setFriendName}
+            friendImage={friendImage}
+            setFriendImage={setFriendImage}
+            onSubmit = {handleAddFriend}
+          />
+          <Button
+            number="2"
+            newClass="addFriend"
+            friend={friend}
+            setFriend={setFriend}
+          >
+            Close
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -53,35 +94,48 @@ function Friend({ friend }) {
         <span>{friend.name}</span>
         <span className="green">Expense note</span>
       </div>
-      <Button className =''>Select</Button>
+      <Button number="1">Select</Button>
     </div>
   );
 }
 
-function AddFriendForm() {
+function AddFriendForm({onSubmit, friendName, setFriendName, friendImage,  setFriendImage}) {
   return (
-    <div className='formClass p-3 mt-4'>
-      <Form formClass='formClass1'>🤼‍♀️ Friend name</Form>
-      <Form formClass='formClass1'>🏞️ Image URL</Form>
-      <div className ='addFr'>
-        <Button>Add</Button>
+    <form className="formClass p-3 mt-4" onSubmit ={onSubmit}>
+      <Form formClass="formClass1" value ={friendName} setOnChange ={setFriendName}>🤼‍♀️ Friend name</Form>
+      <Form formClass="formClass1"value ={friendImage} setOnChange ={setFriendImage}>🏞️ Image URL</Form>
+      <div className="addFr">
+        <Button number="3">Add</Button>
       </div>
-    </div>
+    </form>
   );
 }
 
-function Form({formClass, children}) {
+function Form({ value, setOnChange, formClass, children }) {
   return (
     <div className={`${formClass}  m-2`}>
       <label>{children}</label>
-      <input type="text" name="" id="" />
+      <input type="text" value ={value} onChange = {(e)=> setOnChange(e.target.value)} />
     </div>
   );
 }
 
-function Button({ children, newClass }) {
+function Button({ number, friend, setFriend, children, newClass }) {
+  const buttonType = {
+    type: "button",
+    value: friend,
+    onClick: () => setFriend(!friend),
+  };
+  if (number === "1") {
+    buttonType.value = undefined;
+    buttonType.onClick = undefined;
+  } else if (number === "3") {
+    buttonType.value = undefined;
+    buttonType.onClick = undefined;
+    buttonType.type = "submit";
+  }
   return (
-    <button type="button" className={`${newClass} btn btn-sm btn-warning`}>
+    <button {...buttonType} className={`${newClass} btn btn-sm btn-warning`}>
       {children}
     </button>
   );
