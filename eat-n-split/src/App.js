@@ -21,15 +21,22 @@ const initialFriends = [
 ];
 
 function App() {
+  const[selectedFriend, setSelectedFriend] = useState(null)
+  const [condition, setCondition] = useState(false);
+
+  function handleShowSplitBill(friend) {
+    setSelectedFriend((cur) => (cur?.id === friend.id? null: friend))
+    setCondition(false);
+  }
   return (
-    <div className="App">
-      <FriendList />
+    <div className="row">
+      <FriendList setSelectedFriend={handleShowSplitBill} selectedFriend={selectedFriend} condition={condition} setCondition={setCondition}/>
+      {selectedFriend && <SplitBill friendClick={selectedFriend}/>}
     </div>
   );
 }
 
-function FriendList() {
-  const [friend, setFriend] = useState(false);
+function FriendList({setSelectedFriend, selectedFriend, condition, setCondition}) {
   const [friendList, setFriendList] = useState(initialFriends);
   const [friendName, setFriendName] = useState("");
   const [friendImage, setFriendImage] = useState("https://i.pravatar.cc/48");
@@ -43,45 +50,72 @@ function FriendList() {
       balance: 0,
     };
     setFriendList((friendList) => [...friendList, addNewFriend]);
+    
   }
   return (
     <div>
       {friendList.map((e, i) => (
-        <Friend friend={e} key={i} />
+        <Friend
+          friend={e}
+          key={e.i}
+          selectedFriend={selectedFriend}
+          setSelectedFriend={setSelectedFriend}
+        />
       ))}
-      <Button
-        number="2"
-        newClass="addFriend"
-        friend={friend}
-        setFriend={setFriend}
-      >
-        {" "}
-        Add friend
-      </Button>
-      {friend && (
+
+      {condition && (
         <div>
           <AddFriendForm
             friendName={friendName}
             setFriendName={setFriendName}
             friendImage={friendImage}
             setFriendImage={setFriendImage}
-            onSubmit = {handleAddFriend}
+            onSubmit={handleAddFriend}
           />
-          <Button
-            number="2"
-            newClass="addFriend"
-            friend={friend}
-            setFriend={setFriend}
-          >
-            Close
-          </Button>
         </div>
       )}
+      <Button
+        number="2"
+        newClass="addFriend"
+        condition={condition}
+        setCondition={setCondition}
+      >
+        {condition?'Close':'Add friend'}
+      </Button>
     </div>
   );
 }
+function SplitBill({friendClick}) {
+  const [billValue, setBillValue] = useState('')
+  const [whoIsPaying, setWhoIsPaying] = useState('You')
+  const [yourExpense, setYourExpense] = useState('')
+  const yourFriendExpense = billValue?billValue-yourExpense:''
 
-function Friend({ friend }) {
+  return (
+    <div className="formClass ml-5">
+      <h3>SPLIT A BILL WITH {friendClick.name}</h3>
+      <form>
+        <Form type="number" formClass="formClass1" value={billValue} setOnChange={setBillValue}>
+          💵 Bill value
+        </Form>
+        <Form type="number" formClass="formClass1" value={yourExpense} setOnChange={setYourExpense}>
+          💵 Your expense
+        </Form>
+        <Form type="number" friendExpense={true} formClass="formClass1" value={yourFriendExpense}>
+          💵 {friendClick.name}'s expense
+        </Form>
+        <Form type="option" formClass="formClass1" friendClick={friendClick} value={whoIsPaying} setOnChange={setWhoIsPaying}>
+          💵 Who is paying the bill?
+        </Form>
+        <Button number="3" newClass="addFriend">
+          Spilt Bill
+        </Button>
+      </form>
+    </div>
+  );
+}
+function Friend({ friend, setSelectedFriend, selectedFriend }) {
+  const isSelected = selectedFriend?.id === friend.id;
   return (
     <div className="d-flex justify-content-between align-items-center m-4">
       <img
@@ -91,10 +125,12 @@ function Friend({ friend }) {
         alt="Avatar"
       />
       <div className="d-flex flex-column">
-        <span>{friend.name}</span>
-        <span className="green">Expense note</span>
+        <h6>{friend.name}</h6>
+        {friend.balance < 0 && (<p className="red">You owe {friend.name} {Math.abs(friend.balance)}</p>)}
+        {friend.balance > 0 && (<p className="green">Your friend owe {friend.name} {Math.abs(friend.balance)}</p>)}
+        {friend.balance === 0 && (<p>You owe {friend.name} {Math.abs(friend.balance)}</p>)}
       </div>
-      <Button number="1">Select</Button>
+      <Button onClick = {()=>setSelectedFriend(friend)} condition={selectedFriend} number="1">{isSelected?'Close':'Select'}</Button>
     </div>
   );
 }
@@ -102,8 +138,8 @@ function Friend({ friend }) {
 function AddFriendForm({onSubmit, friendName, setFriendName, friendImage,  setFriendImage}) {
   return (
     <form className="formClass p-3 mt-4" onSubmit ={onSubmit}>
-      <Form formClass="formClass1" value ={friendName} setOnChange ={setFriendName}>🤼‍♀️ Friend name</Form>
-      <Form formClass="formClass1"value ={friendImage} setOnChange ={setFriendImage}>🏞️ Image URL</Form>
+      <Form type ='text'formClass="formClass1" value ={friendName} setOnChange ={setFriendName}>🤼‍♀️ Friend name</Form>
+      <Form type ='text' formClass="formClass1"value ={friendImage} setOnChange ={setFriendImage}>🏞️ Image URL</Form>
       <div className="addFr">
         <Button number="3">Add</Button>
       </div>
@@ -111,25 +147,41 @@ function AddFriendForm({onSubmit, friendName, setFriendName, friendImage,  setFr
   );
 }
 
-function Form({ value, setOnChange, formClass, children }) {
+function Form({ type, value, setOnChange,friendExpense, formClass, children, friendClick }) {
   return (
-    <div className={`${formClass}  m-2`}>
+    <form className={`${formClass}  m-2`}>
       <label>{children}</label>
-      <input type="text" value ={value} onChange = {(e)=> setOnChange(e.target.value)} />
-    </div>
+      {type === "option" ? (
+        <>
+          <select value={value} onChange={(e) => setOnChange(+e.target.value)}>
+            <option value="You">You</option>
+            <option value={friendClick.name}>{friendClick.name}</option>
+          </select>
+        </>
+      ) : (
+        <>
+          <input
+            type={type}
+            value={value}
+            onChange={(e) => setOnChange(e.target.value)}
+            disabled={friendExpense}
+          />
+        </>
+      )}
+    </form>
   );
 }
 
-function Button({ number, friend, setFriend, children, newClass }) {
+function Button({ number,onClick, condition, setCondition, children, newClass }) {
   const buttonType = {
     type: "button",
-    value: friend,
-    onClick: () => setFriend(!friend),
+    value: condition,
+    onClick: () => setCondition(!condition),
   };
-  if (number === "1") {
-    buttonType.value = undefined;
-    buttonType.onClick = undefined;
-  } else if (number === "3") {
+  if (number==='1') {
+    buttonType.onClick = onClick;
+  }
+if (number === "3") {
     buttonType.value = undefined;
     buttonType.onClick = undefined;
     buttonType.type = "submit";
